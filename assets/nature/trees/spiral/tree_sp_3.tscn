@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfclm10jcq1m3"]
+
+[ext_resource type="PackedScene" uid="uid://ydcwtu5tpeb6" path="res://assets/nature/Tree Spiral-gI3kqnqg80.glb" id="1_aq4yh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cdddm"]
+size = Vector3(0.5864384, 2.8727303, 0.6387024)
+
+[node name="Root Scene" instance=ExtResource("1_aq4yh")]
+
+[node name="Area3D" type="StaticBody3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09122777, 1.0168104, 0.12613416)
+collision_layer = 5
+collision_mask = 5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7041683, 0.43078995, -0.14642334)
+shape = SubResource("BoxShape3D_cdddm")

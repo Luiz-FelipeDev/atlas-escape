@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwnsmsujuum27"]
+
+[ext_resource type="PackedScene" uid="uid://da8ohftlwpucv" path="res://assets/nature/Tree Floating-tj2fePl8Eu.glb" id="1_wogeg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8r0ig"]
+size = Vector3(0.62805176, 2.8631897, 0.56030273)
+
+[node name="Root Scene" instance=ExtResource("1_wogeg")]
+
+[node name="Area3D" type="StaticBody3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.009460449, 1.4205953, 0)
+shape = SubResource("BoxShape3D_8r0ig")

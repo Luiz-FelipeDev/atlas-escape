@@ -1,0 +1,15 @@
+# Arquivos de build e temporários da Godot
+.godot/
+.import/
+export_presets.cfg
+
+# Configurações específicas do seu editor local
+.mono/
+data_*/
+mono_crash_release_*.json
+
+# Arquivos de sistema e builds finais (opcional, mas recomendado)
+*.tmp
+*.log
+android/
+build/
