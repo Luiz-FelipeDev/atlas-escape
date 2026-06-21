@@ -6,10 +6,15 @@
 [ext_resource type="PackedScene" uid="uid://micgwbpw0qyy" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/scenes/player.tscn" id="4_mad0u"]
 [ext_resource type="Resource" uid="uid://xmfc3ulr0r5m" path="res://game/world/biomes/biome_spiral.tres" id="5_prd21"]
 [ext_resource type="PackedScene" uid="uid://dhx2mx20t554b" path="res://assets/nature/stones/stone_1.tscn" id="6_mad0u"]
+[ext_resource type="Script" uid="uid://bnm6pnn7qblm8" path="res://game/world/biome_data.gd" id="6_mqk4b"]
+[ext_resource type="Resource" uid="uid://bixdr5csoih47" path="res://game/world/biomes/biome_blob.tres" id="7_lj0gc"]
 [ext_resource type="PackedScene" uid="uid://wynna8ewp8aq" path="res://assets/nature/stones/stone_2.tscn" id="7_ocfjn"]
+[ext_resource type="Resource" uid="uid://cvkkkhvjtpr5m" path="res://game/world/biomes/biome_ice.tres" id="8_3rfcy"]
 [ext_resource type="PackedScene" uid="uid://cjl5fnywswnn5" path="res://assets/nature/stones/stone_3.tscn" id="8_dqqhb"]
 [ext_resource type="PackedScene" uid="uid://cturila3jdj3t" path="res://assets/nature/stones/stone_4.tscn" id="9_b2suy"]
+[ext_resource type="Resource" uid="uid://c3tuhmb6d41tv" path="res://game/world/biomes/biome_lava.tres" id="9_par4i"]
 [ext_resource type="PackedScene" uid="uid://b74xcutef4bcx" path="res://assets/nature/stones/stone_5.tscn" id="10_h8lre"]
+[ext_resource type="Resource" uid="uid://cta73kl0xa5fn" path="res://game/world/biomes/biome_spike.tres" id="10_m774e"]
 [ext_resource type="PackedScene" uid="uid://tw256hryko4w" path="res://assets/nature/stones/stone_6.tscn" id="11_ysn08"]
 [ext_resource type="PackedScene" uid="uid://jfihh0eik04r" path="res://assets/nature/stones/stone_7.tscn" id="12_m0cxt"]
 [ext_resource type="PackedScene" uid="uid://dmuihmi77leto" path="res://game/enemies/enemy_large.tscn" id="13_ocfjn"]
@@ -111,6 +116,7 @@ player_scene = ExtResource("4_mad0u")
 terrain_generator = NodePath("../islandGenerator")
 world_environment = NodePath("../WorldEnvironment")
 current_biome = ExtResource("5_prd21")
+available_biomes = Array[ExtResource("6_mqk4b")]([ExtResource("7_lj0gc"), ExtResource("8_3rfcy"), ExtResource("9_par4i"), ExtResource("10_m774e"), ExtResource("5_prd21")])
 tree_count = 300
 min_tree_scale = 1.0
 max_tree_scale = 4.0

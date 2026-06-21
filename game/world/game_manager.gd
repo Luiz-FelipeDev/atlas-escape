@@ -7,6 +7,7 @@ extends Node
 
 @export_group("biome configuration")
 @export var current_biome: BiomeData
+@export var available_biomes: Array[BiomeData]
 
 @export_group("surface generation rules")
 @export var min_spawn_height: float = 12.0 
@@ -52,6 +53,13 @@ extends Node
 func _ready() -> void:
 	# Chama a função que cuida de toda a lógica da seed
 	generate_seed()
+	
+	if not available_biomes.is_empty():
+		var biome_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+		biome_rng.seed = world_seed
+		var random_index: int = biome_rng.randi_range(0, available_biomes.size() - 1)
+		current_biome = available_biomes[random_index]
+
 	# é verificada a dependência do gerador de terreno
 	if terrain_generator:
 		# são transferidas as propriedades visuais do bioma antes da execução
