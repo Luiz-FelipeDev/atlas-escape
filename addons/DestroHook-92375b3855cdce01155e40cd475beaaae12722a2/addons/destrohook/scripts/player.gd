@@ -16,6 +16,11 @@ var current_health: int
 
 @export var mouse_sensitivity: float = 1.0 
 
+@export_group("ui settings")
+# IMPORTANTE: Confirme se o caminho do AnimationPlayer está correto na sua árvore!
+@onready var animation_player: AnimationPlayer = $CameraHolder/Camera/AnimationPlayer
+var is_book_open: bool = false
+
 @export_group("movement settings")
 @export var walk_speed: float = 10.0
 @export var run_speed: float = 20.0
@@ -91,10 +96,14 @@ func _physics_process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# é processada a rotação da câmera baseada no movimento do mouse
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not is_book_open:
 		rotation_degrees.y -= event.relative.x * 0.06 * mouse_sensitivity
 		camera.rotation_degrees.x -= event.relative.y * 0.06 * mouse_sensitivity
 		camera.rotation_degrees.x = clamp(camera.rotation_degrees.x, -90.0, 90.0)
+		
+	# === NOVA PARTE: Detecta o botão que acabamos de criar no Input Map ===
+	if event.is_action_pressed("action_toggle_book"):
+		toggle_book()
 
 func handle_state_speeds() -> void:
 	# é definida a velocidade máxima baseada no estado atual
@@ -118,6 +127,11 @@ func handle_state_speeds() -> void:
 			current_control = fast_control
 
 func handle_movement_and_gravity(movement_direction: Vector2, movement_vector: Vector3, delta: float) -> void:
+	# Parar o personagem se o livro estiver aberto
+	if is_book_open:
+		movement_vector = Vector3.ZERO
+		movement_direction = Vector2.ZERO
+
 	# é aplicada a interpolação vetorial responsiva
 	if movement_direction.length() > 0.0:
 		velocity.x = lerpf(velocity.x, movement_vector.x * current_max_speed, acceleration * current_control * delta)
@@ -137,12 +151,16 @@ func handle_movement_and_gravity(movement_direction: Vector2, movement_vector: V
 		velocity.y -= gravity * delta
 
 	# é validada a execução do pulo com base no limite configurado
-	if Input.is_action_just_pressed("action_jump") and not is_wallrunning:
+	if Input.is_action_just_pressed("action_jump") and not is_wallrunning and not is_book_open:
 		if current_jumps < max_jumps:
 			velocity.y = jump_force
 			current_jumps += 1
 
 func handle_dash(movement_vector: Vector3) -> void:
+	# Bloqueia o dash se o livro estiver aberto
+	if is_book_open:
+		return
+		
 	# é aplicado o vetor de força instantânea
 	if Input.is_action_just_pressed("action_dash") and current_dash_cooldown <= 0.0:
 		var dash_dir: Vector3 = movement_vector
@@ -154,7 +172,7 @@ func handle_dash(movement_vector: Vector3) -> void:
 		current_dash_cooldown = dash_cooldown
 
 func handle_wallrun(movement_direction: Vector2, delta: float) -> void:
-	if not left_wall_raycast or not right_wall_raycast:
+	if not left_wall_raycast or not right_wall_raycast or is_book_open:
 		return
 
 	var is_touching_wall: bool = left_wall_raycast.is_colliding() or right_wall_raycast.is_colliding()
@@ -185,7 +203,7 @@ func handle_camera_effects(movement_direction: Vector2, delta: float) -> void:
 	var target_cam_pos: Vector3 = Vector3.ZERO
 
 	# é calculada a oscilação estabilizada da visão com seno e cosseno
-	if is_on_floor() and movement_direction.length() > 0.0:
+	if is_on_floor() and movement_direction.length() > 0.0 and not is_book_open:
 		var speed_ratio: float = velocity.length() / walk_speed
 		bob_time += delta * bob_frequency * speed_ratio
 		
@@ -230,3 +248,26 @@ func take_damage(amount: int) -> void:
 func die() -> void:
 	# Restarts the current scene on death
 	get_tree().reload_current_scene()
+
+# === FUNÇÃO QUE CONTROLA O LIVRO ===
+# === FUNÇÃO QUE CONTROLA O LIVRO (Agora com anti-bugs!) ===
+func toggle_book() -> void:
+	# SEGURO DE VIDA: Se o AnimationPlayer não estiver linkado direito, avisa no console e cancela!
+	if animation_player == null:
+		print("🚨 [ERRO FATAL] AnimationPlayer não encontrado! O caminho '$CameraHolder/Camera/AnimationPlayer' está errado. Arraste ele de novo pro script!")
+		return 
+
+	is_book_open = !is_book_open
+	
+	if is_book_open:
+		# Toca a animação do início ao fim (Livro abrindo)
+		animation_player.play("open_book")
+		
+		# Solta o mouse para clicar na interface do livro
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE 
+	else:
+		# Toca a mesma animação de trás pra frente! (Livro fechando)
+		animation_player.play_backwards("open_book")
+		
+		# Prende o mouse de volta para controlar a câmera
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
