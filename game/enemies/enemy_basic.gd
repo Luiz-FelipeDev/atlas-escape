@@ -81,6 +81,10 @@ func _find_player() -> void:
 	player = closest
 
 func _chase_player(delta: float) -> void:
+	if not is_instance_valid(player) or not player.is_inside_tree():
+		_apply_gravity_only(delta)
+		return
+
 	var distance: float = global_position.distance_to(player.global_position)
 
 	if distance > lose_target_radius:
