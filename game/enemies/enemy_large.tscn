@@ -11,9 +11,10 @@ script = ExtResource("1_script")
 attack_damage = 1
 
 [node name="EnemyModel" parent="." unique_id=1760974431 instance=ExtResource("2_model")]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
-[node name="Skeleton3D" parent="EnemyModel/RootNode/CharacterArmature" parent_id_path=PackedInt32Array(1760974431, 1873588678) index="0" unique_id=1419890143]
+
+[node name="Skeleton3D" parent="EnemyModel/RootNode/CharacterArmature" parent_id_path=PackedInt32Array(1760974431, 770587212) index="0" unique_id=1400968193]
 bones/2/position = Vector3(5.7542253e-05, 0.008646074, 0.001975406)
 bones/2/rotation = Quaternion(0.007875373, 0.07246826, -0.00082247297, 0.99733937)
 bones/4/rotation = Quaternion(0.13561171, 4.2085443e-07, 6.784959e-08, 0.99076205)
