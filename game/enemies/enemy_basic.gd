@@ -7,12 +7,12 @@ extends CharacterBody3D
 # raycast vertical -- a mesma tecnica usada pelo game_manager para plantar
 # arvores -- para "grudar" no chao a cada frame fisico.
 
-enum EnemyRole { MELEE, RANGED }
+enum EnemyRole {MELEE, RANGED}
 @export var role: EnemyRole = EnemyRole.MELEE
 
 @export_group("deteccao")
 @export var detection_radius: float = 20.0
-@export var lose_target_radius: float = 30.0 
+@export var lose_target_radius: float = 30.0
 
 @export_group("combate")
 @export var attack_range: float = 2.5
@@ -34,20 +34,42 @@ enum EnemyRole { MELEE, RANGED }
 # inclinacao maxima de terreno que o inimigo consegue subir (1.0 = totalmente plano)
 @export var max_slope_dot: float = 0.6
 
+@export_group("saúde e ragdoll")
+@export var max_health: int = 100
+var current_health: int = 100
+var is_knocked_out: bool = false
+
 @onready var anim_player = $EnemyModel/AnimationPlayer
+@onready var skeleton: Skeleton3D = $EnemyModel/RootNode/CharacterArmature/Skeleton3D
+@onready var main_collider = $CollisionShape3D
+
+# nó responsável por simular/parar o ragdoll. É um PhysicalBoneSimulator3D
+# criado como filho do Skeleton3D ao usar "Create Physical Skeleton" no editor.
+# Ajuste o nome do caminho abaixo caso o editor tenha gerado um nome diferente.
+@onready var bone_simulator: PhysicalBoneSimulator3D = skeleton.get_node_or_null("PhysicalBoneSimulator3D")
 
 var player: Node3D = null
 var _space_state: PhysicsDirectSpaceState3D
-var _time_since_last_attack: float = 0.0
 
 func _ready() -> void:
 	# e adicionado a um grupo proprio para facilitar contagem/gerenciamento futuro
 	add_to_group("enemies")
 	_space_state = get_world_3d().direct_space_state
+	current_health = max_health
+
+	if not bone_simulator:
+		push_warning("EnemyBasic: PhysicalBoneSimulator3D não encontrado sob o Skeleton3D. O ragdoll não vai funcionar até a 'Create Physical Skeleton' ser feita no editor.")
+	else:
+		# Impede que os ossos físicos colidam com o próprio CharacterBody3D do
+		# inimigo. Sem isso, o corpo principal fica colidindo com seus próprios
+		# ossos físicos a cada frame e é empurrado continuamente, fazendo o
+		# inimigo "fugir" descontroladamente (inclusive para fora do terreno).
+		bone_simulator.physical_bones_add_collision_exception(get_rid())
 
 func _physics_process(delta: float) -> void:
-	
-	_time_since_last_attack += delta
+	# se o inimigo estiver desmaiado, interrompe toda a lógica de física e perseguição
+	if is_knocked_out:
+		return
 		
 	if not is_instance_valid(player):
 		_find_player()
@@ -173,24 +195,67 @@ func _apply_gravity_only(delta: float) -> void:
 				#velocity.y = 0.0
 				#
 				
-func apply_color(new_color: Color) -> void:
-	# ATENÇÃO: Substitua o caminho abaixo pelo caminho exato da sua malha 3D
-	# Segure Ctrl (ou Cmd) e arraste a malha do painel Scene para cá para colar o caminho certo.
-	var mesh_instance: MeshInstance3D = $EnemyModel/RootNode/CharacterArmature/Skeleton3D/Enemy
+func apply_color(new_color: Color, allowed_mobs: Array[String]) -> void:
+	# Gets the exact filename of the current scene
+	var current_mob_name: String = scene_file_path.get_file().get_basename()
 	
-	if mesh_instance:
-		# Pega o material atual do inimigo (slot 0)
-		var original_material: Material = mesh_instance.get_active_material(0)
+	# Aborts painting if the current mob is not in the allowed list
+	if not current_mob_name in allowed_mobs:
+		return
 		
-		if original_material:
-			# DUPLICA o material para torná-lo único para este inimigo instanciado
-			var unique_material: StandardMaterial3D = original_material.duplicate()
-			
-			# Altera a cor
-			unique_material.albedo_color = new_color
-			
-			# Aplica o material exclusivo de volta na malha
-			mesh_instance.set_surface_override_material(0, unique_material)
+	var skeleton: Skeleton3D = find_child("Skeleton3D", true, false)
+	if not skeleton:
+		return
+		
+	for child in skeleton.get_children():
+		if child is MeshInstance3D:
+			var original_material: Material = child.get_active_material(0)
+			if original_material:
+				var unique_material: StandardMaterial3D = original_material.duplicate()
+				unique_material.albedo_color = new_color
+				child.set_surface_override_material(0, unique_material)
+
+func take_damage(amount: int) -> void:
+	# ignora o dano se já estiver no chão
+	if is_knocked_out:
+		return
+
+	current_health -= amount
+	
+	# se a vida zerar, ele desmaia ao invés de ser deletado
+	if current_health <= 0:
+		knockout()
+
+func knockout() -> void:
+	is_knocked_out = true
+	
+	if anim_player:
+		anim_player.stop()
+		
+	main_collider.disabled = true
+	
+	if bone_simulator:
+		bone_simulator.physical_bones_start_simulation()
+		# Evita que o renderizador "interpole"/suavize entre a pose animada
+		# anterior e a pose física nova, o que causa o esticamento visual
+		# e o tremor no instante exato da troca.
+		skeleton.reset_physics_interpolation()
+
+	await get_tree().create_timer(5.0).timeout
+	recover()
+
+func recover() -> void:
+	if bone_simulator:
+		var hip_bone: PhysicalBone3D = bone_simulator.get_node_or_null("Hips")
+		if hip_bone:
+			global_position = hip_bone.global_position
+
+		bone_simulator.physical_bones_stop_simulation()
+		skeleton.reset_physics_interpolation()
+		
+	current_health = max_health
+	main_collider.disabled = false
+	is_knocked_out = false
 
 func perform_attack() -> void:
 	if not player or not is_instance_valid(player):

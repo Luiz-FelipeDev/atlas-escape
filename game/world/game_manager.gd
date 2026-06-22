@@ -1,3 +1,5 @@
+#game_manager.gd
+
 extends Node
 
 @export var player_scene: PackedScene
@@ -12,7 +14,8 @@ extends Node
 @export_group("surface generation rules")
 @export var min_spawn_height: float = 12.0 
 @export var max_slope_angle: float = 0.8 
-@export var minimum_prop_spacing: float = 4.5 
+@export var minimum_prop_spacing: float = 4.5
+@export var branch_scenes: Array[PackedScene]
 
 @export_group("flora generation")
 @export var tree_count: int = 150
@@ -95,6 +98,7 @@ func _on_terrain_generated() -> void:
 	# são gerados os elementos globais na mesma lista de verificação de espaço
 	spawn_surface_props(rng, surface_rock_scenes, surface_rock_count, min_surface_scale, max_surface_scale, occupied_positions)
 	spawn_floating_rocks(rng)
+	spawn_surface_props(rng, branch_scenes, 20, 0.8, 1.2, occupied_positions)
 	
 	# é gerado o jogador e guardada a sua posição no mundo
 	var player_pos: Vector3 = spawn_player()
@@ -267,6 +271,9 @@ func spawn_enemies(rng: RandomNumberGenerator, occupied_positions: Array[Vector3
 		"ff9900",   # Laranja
 		"8a2be2"   # Roxo
 	]
+	
+	# Defines exactly which enemies can receive the random colors
+	var paintable_mobs: Array[String] = ["enemy_basic", "enemy_large"]
 
 	while enemies_planted < enemy_count and attempts < max_attempts:
 		attempts += 1
@@ -300,18 +307,18 @@ func spawn_enemies(rng: RandomNumberGenerator, occupied_positions: Array[Vector3
 				if is_too_close:
 					continue
 
-				# instanciação e configuração do inimigo
+				# Instantiation and configuration
 				var random_enemy_scene: PackedScene = enemy_scenes.pick_random()
 				var enemy_instance: Node3D = random_enemy_scene.instantiate()
 				add_child(enemy_instance)
 				enemy_instance.global_position = hit_position
 
-				# aplicação da cor aleatória
+				# Random color application with authorization list
 				var random_index: int = rng.randi_range(0, color_options.size() - 1)
 				var chosen_color: String = color_options[random_index]
 
 				if enemy_instance.has_method("apply_color"):
-					enemy_instance.apply_color(chosen_color)
+					enemy_instance.apply_color(Color(chosen_color), paintable_mobs)
 
 				occupied_positions.append(hit_position)
 				enemies_planted += 1
