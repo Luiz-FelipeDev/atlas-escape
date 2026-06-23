@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dnx2lsiobb1hn" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/textures/hook_not_availible.png" id="3_ee8s0"]
 [ext_resource type="Texture2D" uid="uid://cskw882fffi36" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/textures/hook_availible.png" id="3_k3ota"]
 [ext_resource type="PackedScene" uid="uid://dlqm10204rcaq" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/scenes/hook.tscn" id="3_ruq25"]
+[ext_resource type="PackedScene" uid="uid://ceqsrbt6elh88" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/scenes/weapon_branch.tscn" id="5_ktl0y"]
 [ext_resource type="Texture2D" uid="uid://dw00efp6b3fn8" path="res://addons/DestroHook-92375b3855cdce01155e40cd475beaaae12722a2/addons/destrohook/textures/gray_checkers.png" id="5_wmoau"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_iop0k"]
@@ -16,128 +17,6 @@ albedo_texture = ExtResource("2_a4764")
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_rx8sc"]
 radial_segments = 16
 rings = 4
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_4lji1"]
-top_radius = 0.05
-bottom_radius = 0.02
-height = 0.95458984
-
-[sub_resource type="Animation" id="Animation_8u61o"]
-length = 0.26666668
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector3(0.4373234, 0.013440132, -0.728209)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector3(-0.13909972, -0.13928238, 0.08902946)]
-}
-
-[sub_resource type="Animation" id="Animation_ktl0y"]
-resource_name = "heavy_charge"
-length = 2.7666667
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 2.7333333),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(0.4373234, 0.013440132, -0.728209), Vector3(0.017501533, 0.6637571, -0.5616807)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 2.7333333),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(-0.13909972, -0.13928238, 0.08902946), Vector3(0.71170586, -0.18257989, -0.050416876)]
-}
-
-[sub_resource type="Animation" id="Animation_f7dls"]
-resource_name = "heavy_swing"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.23333335, 0.43333316, 0.9666664),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(0.017501533, 0.6637571, -0.5616807), Vector3(0.017501533, 0.6637571, -0.5616807), Vector3(0.017501533, 0.0075149536, -1.0815005), Vector3(0.4373234, 0.013440132, -0.728209)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.23333335, 0.43333316, 0.9666664),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(0.7117058, -0.18257989, -0.050416887), Vector3(0.71170586, -0.18257989, -0.050416876), Vector3(-1.1340591, -0.33106506, 0.37152502), Vector3(-0.13909972, -0.13928238, 0.08902946)]
-}
-
-[sub_resource type="Animation" id="Animation_njh6e"]
-resource_name = "quick_swing"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.23333335, 0.43333316, 0.96666646),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(0.4373234, 0.013440132, -0.728209), Vector3(0.017501533, 0.6637571, -0.5616807), Vector3(0.017501533, 0.0075149536, -1.0815005), Vector3(0.4373234, 0.013440132, -0.728209)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.23333335, 0.43333316, 0.96666646),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(-0.13909972, -0.13928238, 0.08902946), Vector3(0.71170586, -0.18257989, -0.050416876), Vector3(-1.1340591, -0.33106506, 0.37152502), Vector3(-0.13909972, -0.13928238, 0.08902946)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_mfwd6"]
-_data = {
-&"RESET": SubResource("Animation_8u61o"),
-&"heavy_charge": SubResource("Animation_ktl0y"),
-&"heavy_swing": SubResource("Animation_f7dls"),
-&"quick_swing": SubResource("Animation_njh6e")
-}
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hpxpa"]
 albedo_texture = ExtResource("5_wmoau")
@@ -285,13 +164,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.49859214, 0, 0, 0)
 [node name="Hook Raycast" type="RayCast3D" parent="CameraHolder/Camera" unique_id=1374161625]
 target_position = Vector3(0, 0, -50)
 
-[node name="WeaponBranch" type="MeshInstance3D" parent="CameraHolder/Camera" unique_id=1147063280]
-transform = Transform3D(0.9881048, -0.06887776, -0.13749151, 0.08805309, 0.986419, 0.13865156, 0.12607421, -0.1491089, 0.98075056, 0.4373234, 0.013440132, -0.728209)
-mesh = SubResource("CylinderMesh_4lji1")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="CameraHolder/Camera/WeaponBranch" unique_id=2051009766]
-libraries/ = SubResource("AnimationLibrary_mfwd6")
-speed_scale = 1.5
+[node name="WeaponBranch" parent="CameraHolder/Camera" unique_id=2006977007 instance=ExtResource("5_ktl0y")]
+transform = Transform3D(0.98810476, -0.06887776, -0.13749151, 0.088053085, 0.986419, 0.13865156, 0.1260742, -0.1491089, 0.98075056, 0.4373234, 0.013440132, -0.728209)
 
 [node name="CameraBasedRaycasts" type="Node3D" parent="." unique_id=436684338]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
