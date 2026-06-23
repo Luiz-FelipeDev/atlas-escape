@@ -68,15 +68,54 @@ extends Node
 # INICIALIZAÇÃO
 # ========================================================== #
 
+#func _ready() -> void:
+	## Chama a função que cuida de toda a lógica da seed
+	#generate_seed()
+	#
+	#if not available_biomes.is_empty():
+		#var biome_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+		#biome_rng.seed = world_seed
+		#var random_index: int = biome_rng.randi_range(0, available_biomes.size() - 1)
+		#current_biome = available_biomes[random_index]
+#
+	## é verificada a dependência do gerador de terreno
+	#if terrain_generator:
+		## são transferidas as propriedades visuais do bioma antes da execução
+		#if current_biome:
+			#terrain_generator.grass_color = current_biome.grass_color
+			#terrain_generator.sand_color = current_biome.sand_color
+			#
+			#if world_environment and world_environment.environment and world_environment.environment.sky:
+				#var sky_mat: ProceduralSkyMaterial = world_environment.environment.sky.sky_material as ProceduralSkyMaterial
+				#if sky_mat:
+					#sky_mat.sky_top_color = current_biome.sky_top_color
+					#sky_mat.sky_horizon_color = current_biome.sky_horizon_color
+#
+		## é conectado o sinal e iniciada a geração
+		#terrain_generator.terrain_generated.connect(_on_terrain_generated)
+		#terrain_generator.generate_terrain()
+		
 func _ready() -> void:
 	# Chama a função que cuida de toda a lógica da seed
 	generate_seed()
 	
-	if not available_biomes.is_empty():
+	# 1. Se a lista global estiver vazia (início do jogo ou todos os biomas já foram usados),
+	# nós copiamos a lista disponível do Inspector (available_biomes) para recomeçar o ciclo.
+	if Global.remaining_biomes.is_empty() and not available_biomes.is_empty():
+		Global.remaining_biomes = available_biomes.duplicate()
+		print("🌍 Ciclo de biomas reiniciado. Biomas disponíveis: ", Global.remaining_biomes.size())
+
+	# 2. Sorteia o bioma a partir da lista GLOBAL (que vai diminuindo)
+	if not Global.remaining_biomes.is_empty():
 		var biome_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 		biome_rng.seed = world_seed
-		var random_index: int = biome_rng.randi_range(0, available_biomes.size() - 1)
-		current_biome = available_biomes[random_index]
+		var random_index: int = biome_rng.randi_range(0, Global.remaining_biomes.size() - 1)
+		
+		# Define o bioma atual
+		current_biome = Global.remaining_biomes[random_index]
+		
+		# REMOVE o bioma escolhido da lista global para que não repita na próxima fase!
+		Global.remaining_biomes.remove_at(random_index)
 
 	# é verificada a dependência do gerador de terreno
 	if terrain_generator:
@@ -413,8 +452,6 @@ func spawn_portal(rng: RandomNumberGenerator, occupied_positions: Array[Vector3]
 				occupied_positions.append(hit_position)
 				#print("🚪 Portal gerado com sucesso na posição: ", portal_instance.global_position)
 				return
-
-	#push_error("Portal não gerado! Verifique se max_distance permite espaço suficiente sem água.")
 
 
 func spawn_boss(rng: RandomNumberGenerator, occupied_positions: Array[Vector3], player_pos: Vector3) -> void:
