@@ -84,6 +84,11 @@ _data = {
 &"open_book": SubResource("Animation_mfwd6")
 }
 
+[sub_resource type="CylinderMesh" id="CylinderMesh_ay61g"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 1.3158569
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hpxpa"]
 albedo_texture = ExtResource("5_wmoau")
 
@@ -246,8 +251,11 @@ area_size = Vector2(1.2138337, 1.0005488)
 [node name="Hook Raycast" type="RayCast3D" parent="CameraHolder/Camera" unique_id=1374161625]
 target_position = Vector3(0, 0, -50)
 
-[node name="WeaponBranch" parent="CameraHolder/Camera" unique_id=2006977007 instance=ExtResource("5_ktl0y")]
-transform = Transform3D(0.98810476, -0.06887776, -0.13749151, 0.088053085, 0.986419, 0.13865156, 0.1260742, -0.1491089, 0.98075056, 0.4373234, 0.013440132, -0.728209)
+[node name="WeaponBranch" type="MeshInstance3D" parent="CameraHolder/Camera" unique_id=63734454]
+transform = Transform3D(0.98810476, -0.06887776, -0.13749151, 0.088053085, 0.986419, 0.13865156, 0.1260742, -0.1491089, 0.98075056, 0.4608845, -0.32398582, -0.6772031)
+mesh = SubResource("CylinderMesh_ay61g")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CameraHolder/Camera/WeaponBranch" unique_id=708577427]
 
 [node name="CameraBasedRaycasts" type="Node3D" parent="." unique_id=436684338]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
