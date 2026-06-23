@@ -12,6 +12,6 @@ func setup(data: CreatureData) -> void:
 		# Volta a foto para a cor original (Branco = sem alteração)
 		foto_rect.modulate = Color.WHITE
 	else:
-		nome_label.text = "???"
+		nome_label.text = "?"
 		# Transforma a foto em uma silhueta (Pinta tudo de preto)
 		foto_rect.modulate = Color.BLACK
