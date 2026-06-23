@@ -63,6 +63,16 @@ var wall_normal: Vector3 = Vector3.ZERO
 @export var fov_transition_speed: float = 6.0
 var bob_time: float = 0.0
 
+@export_group("combat system")
+@export var attack_range: float = 3.0
+var attack_hold_time: float = 0.0
+var is_charging_attack: bool = false
+var has_branch: bool = true
+
+# Referências para a arma visual e o animador
+@onready var weapon_mesh: MeshInstance3D = $CameraHolder/Camera/WeaponBranch
+@onready var weapon_anim: AnimationPlayer = $CameraHolder/Camera/WeaponBranch/AnimationPlayer
+
 var current_max_speed: float = 15.0
 var current_control: float = 1.0
 var current_jumps: int = 0
@@ -76,6 +86,61 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if camera:
 		camera.fov = base_fov
+
+func handle_attack(delta: float) -> void:
+	# Impede o ataque caso o jogador não possua o galho
+	if not has_branch:
+		return
+
+	# Registra o momento exato em que o botão foi pressionado
+	if Input.is_action_just_pressed("LMB"):
+		is_charging_attack = true
+		attack_hold_time = 0.0
+		
+		# Inicia a animação de preparação para um possível golpe forte
+		if weapon_anim:
+			weapon_anim.play("heavy_charge")
+
+	# Acumula o tempo enquanto o botão permanece pressionado
+	if is_charging_attack:
+		attack_hold_time += delta
+
+	# Executa o ataque quando o botão é solto
+	if Input.is_action_just_released("LMB") and is_charging_attack:
+		is_charging_attack = false
+		
+		var damage: int = 50 
+
+		if attack_hold_time >= 0.5:
+			# Define o dano pesado e toca a animação do golpe forte
+			damage = 100
+			if weapon_anim:
+				weapon_anim.play("heavy_swing")
+		else:
+			# Toca a animação do golpe rápido caso o clique tenha sido curto
+			if weapon_anim:
+				weapon_anim.play("quick_swing")
+
+		perform_melee_attack(damage)
+
+func perform_melee_attack(damage: int) -> void:
+	var space_state = get_world_3d().direct_space_state
+	
+	# Obtém o centro exato da tela para onde a mira está apontando
+	var screen_center = get_viewport().size / 2.0
+	var ray_origin = camera.project_ray_origin(screen_center)
+	var ray_end = ray_origin + camera.project_ray_normal(screen_center) * attack_range
+
+	# Dispara um raio invisível da câmera até a distância de ataque
+	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	query.exclude = [self] # Impede que o jogador acerte a si mesmo
+
+	var result = space_state.intersect_ray(query)
+
+	# Caso o raio atinja um inimigo, aplica o dano calculado
+	if result and result.collider.is_in_group("enemies"):
+		if result.collider.has_method("take_damage"):
+			result.collider.take_damage(damage)
 	
 func _physics_process(delta: float) -> void:
 	# é atualizado o temporizador de recarga da esquiva
@@ -91,6 +156,7 @@ func _physics_process(delta: float) -> void:
 	handle_movement_and_gravity(movement_direction, movement_vector, delta)
 	handle_camera_effects(movement_direction, delta)
 
+	handle_attack(delta)
 	move_and_slide()
 	update_ui()
 
@@ -244,6 +310,16 @@ func take_damage(amount: int) -> void:
 		
 	if current_health <= 0:
 		die()
+
+func equip_branch() -> void:
+	# Concede ao jogador a habilidade de usar o ataque corpo a corpo
+	has_branch = true
+	
+	# Torna o modelo do galho visível e reseta sua posição
+	if weapon_mesh:
+		weapon_mesh.visible = true
+	if weapon_anim:
+		weapon_anim.play("RESET")
 
 func die() -> void:
 	# Restarts the current scene on death
