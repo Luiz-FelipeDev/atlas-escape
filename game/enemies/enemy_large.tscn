@@ -64,9 +64,10 @@ height = 1.8
 
 [node name="EnemyLarge" type="CharacterBody3D" unique_id=1221156552]
 script = ExtResource("1_script")
+attack_damage = 1
 
 [node name="EnemyModel" parent="." unique_id=1760974431 instance=ExtResource("2_model")]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="EnemyModel/RootNode/CharacterArmature" parent_id_path=PackedInt32Array(1760974431, 1873588678) index="0" unique_id=1419890143]
 bones/1/rotation = Quaternion(1.1700295e-05, 0.70580643, 0.70840484, 1.2026702e-05)
