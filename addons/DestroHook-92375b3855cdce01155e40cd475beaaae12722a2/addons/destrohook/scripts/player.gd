@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 @onready var status_manager: StatusEffectManager = $StatusEffectManager
-
+signal atlas_updated(registry: Dictionary)
 @export_group("health settings")
 @export var max_health: int = 100
 var current_health: int
@@ -22,12 +22,22 @@ var current_health: int
 @onready var animation_player: AnimationPlayer = $CameraHolder/Camera/AnimationPlayer
 var is_book_open: bool = false
 
-@export_group("Binoculos settings")
+@export_group("binoculos settings")
 @export var zoom_fov: float = 30.0 
 @export var lente_ui: ColorRect 
 @export var anim_binoculo: AnimationPlayer 
 var is_scanning: bool = false
-var is_zoomed: bool = false # Nova flag para controlar o timing do zoom do FOV
+var is_zoomed: bool = false 
+
+@export_group("atlas system")
+@export var scan_ui_label: Label 
+@export var required_scan_time: float = 2.0
+var atlas_registry: Dictionary = {}
+var current_scan_target: Node3D = null
+var current_scan_time: float = 0.0
+var total_entities_to_scan: int = 0
+var scanned_entities_count: int = 0
+var is_level_finished: bool = false
 
 @export_group("movement settings")
 @export var walk_speed: float = 10.0
@@ -95,6 +105,91 @@ func _ready() -> void:
 	if camera:
 		camera.fov = base_fov
 
+func initialize_atlas(entities_list: Array[String]) -> void:
+	# é resetado o registro do atlas para a nova fase.
+	atlas_registry.clear()
+	scanned_entities_count = 0
+	is_level_finished = false
+	total_entities_to_scan = entities_list.size()
+
+	# é populado o dicionario com as entidades definidas como nao descobertas.
+	for entity_name in entities_list:
+		atlas_registry[entity_name] = false
+	
+	# é populada a interface inicial com dados vazios/desconhecidos.
+	atlas_updated.emit(atlas_registry)
+		
+	print("atlas initialized with ", total_entities_to_scan, " entities.")
+
+func handle_scanning(delta: float) -> void:
+	# é interrompida a execucao caso o binoculo nao esteja ativo ou a fase ja tenha acabado.
+	if not is_scanning or not is_zoomed or is_level_finished:
+		_reset_scan_state()
+		return
+
+	var collider: Node3D = hook_raycast.get_collider() as Node3D
+
+	# é validado se o objeto mirado é um inimigo.
+	if collider and collider.is_in_group("enemies"):
+		
+		# é extraido o id da entidade diretamente da cena original para evitar bugs de numeracao de instanciacao.
+		var entity_id: String = collider.scene_file_path.get_file().get_basename()
+		
+		# é verificado se a entidade pertence ao bioma e se ainda nao foi descoberta.
+		if atlas_registry.has(entity_id) and not atlas_registry[entity_id]:
+			
+			# é reiniciado o temporizador se o jogador mudar de alvo.
+			if current_scan_target != collider:
+				current_scan_target = collider
+				current_scan_time = 0.0
+				
+			# é incrementado o tempo de foco no alvo.
+			current_scan_time += delta
+			
+			# é calculada e formatada a porcentagem para a interface.
+			var progress: int = int((current_scan_time / required_scan_time) * 100)
+			_update_scan_ui("< ESCANEANDO... >" + str(progress) + "%")
+			
+			# é efetivada a descoberta caso o tempo seja atingido.
+			if current_scan_time >= required_scan_time:
+				_register_discovery(entity_id)
+		else:
+			_update_scan_ui("< SALVO NO ATLAS > ")
+			current_scan_time = 0.0
+	else:
+		# é resetado o estado se olhar para o cenario.
+		_reset_scan_state()
+		_update_scan_ui("< SCANNER FUNCIONANDO >")
+
+func _register_discovery(entity_id: String) -> void:
+	# é marcada a entidade como descoberta no dicionario.
+	atlas_registry[entity_id] = true
+	scanned_entities_count += 1
+	current_scan_time = 0.0
+	current_scan_target = null
+	
+	_update_scan_ui("discovered: " + entity_id + "!")
+	print("atlas updated: ", entity_id)
+	
+	# é emitido o sinal passando o dicionario atualizado para a interface.
+	atlas_updated.emit(atlas_registry)
+	
+	# é validada a condicao de vitoria da fase.
+	if scanned_entities_count >= total_entities_to_scan:
+		is_level_finished = true
+		_update_scan_ui("< DIMENSÃO COMPLETA! SAIA DAQUI! >")
+		print("all entities found. level finished flag set to true.")
+
+func _reset_scan_state() -> void:
+	# sao limpos os dados de escaneamento atual.
+	current_scan_target = null
+	current_scan_time = 0.0
+
+func _update_scan_ui(text_message: String) -> void:
+	# é atualizado o componente de texto da interface, se ele existir.
+	if scan_ui_label:
+		scan_ui_label.text = text_message
+
 func handle_attack(delta: float) -> void:
 	if not has_branch or is_book_open or is_scanning:
 		return
@@ -156,6 +251,8 @@ func _physics_process(delta: float) -> void:
 	handle_camera_effects(movement_direction, delta)
 
 	handle_attack(delta)
+	handle_scanning(delta)
+	
 	move_and_slide()
 	update_ui()
 
@@ -176,7 +273,6 @@ func use_equipped_item() -> void:
 	equipped_item = null
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Olha em volta (is_scanning não trava mais a câmera, só o livro trava)
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not is_book_open:
 		rotation_degrees.y -= event.relative.x * 0.06 * mouse_sensitivity
 		camera.rotation_degrees.x -= event.relative.y * 0.06 * mouse_sensitivity
@@ -214,7 +310,6 @@ func handle_state_speeds() -> void:
 			current_control = fast_control
 
 func handle_movement_and_gravity(movement_direction: Vector2, movement_vector: Vector3, delta: float) -> void:
-	# O binóculo não paralisa mais o movimento! Apenas o livro.
 	if is_book_open:
 		movement_vector = Vector3.ZERO
 		movement_direction = Vector2.ZERO
@@ -244,7 +339,6 @@ func handle_movement_and_gravity(movement_direction: Vector2, movement_vector: V
 			current_jumps += 1
 
 func handle_dash(movement_vector: Vector3) -> void:
-	# Removido bloqueio do binóculo, dash livre
 	if is_book_open:
 		return
 		
@@ -258,7 +352,6 @@ func handle_dash(movement_vector: Vector3) -> void:
 		current_dash_cooldown = dash_cooldown
 
 func handle_wallrun(movement_direction: Vector2, delta: float) -> void:
-	# Wallrun desativado apenas se estiver lendo
 	if not left_wall_raycast or not right_wall_raycast or is_book_open:
 		return
 
@@ -288,7 +381,6 @@ func handle_wallrun(movement_direction: Vector2, delta: float) -> void:
 func handle_camera_effects(movement_direction: Vector2, delta: float) -> void:
 	var target_cam_pos: Vector3 = Vector3.ZERO
 
-	# Removida a trava de is_scanning. A câmera agora balança enquanto você anda escaneando
 	if is_on_floor() and movement_direction.length() > 0.0 and not is_book_open:
 		var speed_ratio: float = velocity.length() / walk_speed
 		bob_time += delta * bob_frequency * speed_ratio
@@ -302,7 +394,6 @@ func handle_camera_effects(movement_direction: Vector2, delta: float) -> void:
 	var target_tilt: float = 0.0
 	var target_fov: float = base_fov
 	
-	# O zoom do FOV agora depende do is_zoomed (após a animação terminar)
 	if is_zoomed:
 		target_fov = zoom_fov
 		target_tilt = - movement_direction.x * base_tilt_angle
@@ -372,12 +463,12 @@ func toggle_binoculos() -> void:
 			anim_binoculo.play("put_on")
 			await anim_binoculo.animation_finished
 			
-		if is_scanning: # Verifica de novo se o jogador não cancelou durante a animação
+		if is_scanning: 
 			if lente_ui:
 				lente_ui.show()
-			is_zoomed = true # Ativa o zoom do FOV perfeitamente sincronizado com a tela escura
+			is_zoomed = true 
 	else:
-		is_zoomed = false # Desfaz o zoom do FOV imediatamente
+		is_zoomed = false 
 		
 		if lente_ui:
 			lente_ui.hide()
