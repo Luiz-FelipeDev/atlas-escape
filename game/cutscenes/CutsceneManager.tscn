@@ -8,7 +8,7 @@
 
 [node name="CutsceneManager" type="CanvasLayer" unique_id=914841961]
 script = ExtResource("1_xlhd2")
-text_list = Array[String](["", "", "Já descobriram o que está acontecendo com os animais?", "Não, ainda pesquisando", "A gente tá ficando sem tempo", "[ Porta abre ]", "Senhor, recebemos uma transmissão!", "Dezenas de Terabytes de dados dos biomas corrompidos", "e um vídeo."])
+text_list = Array[String](["", "", "Já descobriram o que está acontecendo com os animais?", "Não, ainda pesquisando", "A gente tá ficando sem tempo", "- Porta abre -", "Senhor, recebemos uma transmissão!", "Dezenas de Terabytes de dados dos biomas corrompidos", "e um vídeo."])
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1521540577]
 anchors_preset = 15
