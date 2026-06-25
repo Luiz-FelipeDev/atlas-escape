@@ -1,6 +1,9 @@
-# Coffee Rush
+<img width="1919" height="1048" alt="Espiral_biome_screen" src="https://github.com/user-attachments/assets/5e1d7d20-4a4d-40fb-a4c9-9e29fcf127d5" />
+<h1 align="center">Atlas Escape</h1>
 
-O projeto é um protótipo de FPS centrado em movimentação avançada e controle de momento físico. O núcleo da jogabilidade envolve navegar por um ambiente gerado proceduralmente utilizando habilidades de parkour e um gancho mecânico. O objetivo principal é coletar itens de café pelo cenário que ativam um estado de câmera lenta, mecânica essencial para permitir que o jogador sobreviva a ondas massivas de inimigos.
+# Descrição
+
+O projeto é um protótipo de FPS centrado em movimentação e controle de momento físico. O núcleo da jogabilidade envolve navegar por um ambiente gerado proceduralmente utilizando habilidades de parkour e um gancho mecânico. O objetivo principal é catalogar criaturas de diferentes dimensões utilizando ferramentas como binóculos e Atlas. 
 
 ## 1. Estrutura de Diretórios
 
